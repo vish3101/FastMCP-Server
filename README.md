@@ -101,14 +101,14 @@ The server uses SQLite (`expenses.db`). The table is automatically
 created when the server runs.
 
 ``` sql
-CREATE TABLE expenses (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    date TEXT,
-    amount REAL,
-    category TEXT,
-    title TEXT,
-    description TEXT
-);
+    CREATE TABLE  expenses(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        date TEXT NOT NULL,
+        amount REAL NOT NULL,
+        category TEXT NOT NULL,
+        subcategory TEXT DEFAULT '',
+        note TEXT DEFAULT ''
+    )    
 ```
 
 ------------------------------------------------------------------------
