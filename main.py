@@ -70,6 +70,64 @@ def summarize(start_date, end_date, category=None):
         cur = c.execute(query, params)
         cols = [d[0] for d in cur.description]
         return [dict(zip(cols, r)) for r in cur.fetchall()]
+    
+@mcp.tool()
+def delete_expense(expense_id: int) -> str:
+    """
+    Delete an expense by its ID.
+    """
+    import sqlite3
+
+    conn = sqlite3.connect("expenses.db")
+    cursor = conn.cursor()
+
+    # Check if expense exists
+    cursor.execute("SELECT * FROM expenses WHERE id = ?", (expense_id,))
+    record = cursor.fetchone()
+
+    if not record:
+        conn.close()
+        return f"No expense found with ID {expense_id}"
+
+    cursor.execute("DELETE FROM expenses WHERE id = ?", (expense_id,))
+    conn.commit()
+    conn.close()
+
+    return f"Expense with ID {expense_id} deleted successfully."
+
+
+@mcp.tool()
+def edit_expense(expense_id: int, field: str, new_value: str) -> str:
+    """
+    Edit a specific field of an expense.
+    Allowed fields: date, amount, category, title, description
+    """
+    import sqlite3
+
+    allowed_fields = ["date", "amount", "category", "title", "description"]
+
+    if field not in allowed_fields:
+        return f"Invalid field. Allowed fields: {allowed_fields}"
+
+    conn = sqlite3.connect("expenses.db")
+    cursor = conn.cursor()
+
+    # Check existence
+    cursor.execute("SELECT * FROM expenses WHERE id = ?", (expense_id,))
+    record = cursor.fetchone()
+
+    if not record:
+        conn.close()
+        return f"No expense found with ID {expense_id}"
+
+    # Update dynamically but safely
+    query = f"UPDATE expenses SET {field} = ? WHERE id = ?"
+    cursor.execute(query, (new_value, expense_id))
+
+    conn.commit()
+    conn.close()
+
+    return f"Expense ID {expense_id} updated successfully."
 
 @mcp.resource("expense://categories", mime_type="application/json")
 def categories():
